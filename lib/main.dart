@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Animal('Cachorro', 'assets/images/cachorrinho.jpg', 'assets/audio/cachorro.mp3', 'O cachorro é um animal doméstico popular, conhecido por sua lealdade e inteligência.'),
     Animal('Gata', 'assets/images/gatinha.jpg', 'assets/audio/gato.mp3', 'A gata é um animal doméstico independente e brincalhão, conhecido por sua agilidade e graça.'),
     Animal('Vaca', 'assets/images/vaquinha.jpg', 'assets/audio/vaca.mp3', 'A vaca é um animal de fazenda importante, conhecida por sua produção de leite e carne.'),
-    Animal('Ovelha', 'assets/images/ovelha.jpg', 'assets/audio/ovelha.mp3', 'A ovelha é um animal de fazenda dócil e sociável, conhecida por sua lã macia.'),
+    Animal('Ovelha', 'assets/images/ovelha.jpg', 'audio/ovelha.mp3', 'A ovelha é um animal de fazenda dócil e sociável, conhecida por sua lã macia.'),
     Animal('Aranha', 'assets/images/aranha.jpg', 'assets/audio/ovelha.mp3', 'A aranha é um aracnídeo com oito patas, muitas vezes temido por sua teia e veneno.'),
     Animal('Cabrito', 'assets/images/cabrito.jpg', 'assets/audio/ovelha.mp3', 'O cabrito é um animal de fazenda jovem e brincalhão, conhecido por sua energia e vitalidade.'),
     Animal('Cavalo', 'assets/images/cavalo.jpg', 'assets/audio/ovelha.mp3', 'O cavalo é um animal de grande porte, conhecido por sua força e velocidade.'),
@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   final AudioPlayer audioPlayer = AudioPlayer();
+  bool musicPlayng = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await audioPlayer.stop();
+                          /*await audioPlayer.stop();
                           await audioPlayer.play(
                             AssetSource(animais[index].audio),
-                          );
+                          );*/
                         },
                         child: Card(
                           elevation: 5,
@@ -91,8 +92,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 right: 2,
                                 child: IconButton(
                                   iconSize: 38,
-                                  icon: Icon(Icons.info_outline, color: Colors.white,),
-                                  onPressed: () => showAnimalInfo(context, animais[index]),
+                                  icon: Icon(Icons.play_circle_outline_outlined, color: Colors.white,),
+                                  onPressed: () async {
+                                    //await audioPlayer.stop(); // Stop any previously playing sound
+                                    await audioPlayer.play(AssetSource(animais[index].audio));
+                                    musicPlayng = true;
+                                    showAnimalInfo(context, animais[index]);
+                                  },
                                 ),
                               ),
                             ],
@@ -159,70 +165,95 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.75, // Adjust height as needed
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Image covering the entire BottomSheet with rounded corners
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  //borda imagem
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
-                child: Image.asset(
-                  animal.imagem,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
               ),
-              // Padding for the text, positioned below the expanded image
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 150, // Provide a specific height for the bar
-                child: ClipRRect(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Colors.black.withOpacity(0.4),
-                          Colors.transparent
-                        ],
-                      ),
+              child: Stack(
+                children: [
+                  // Image covering the entire BottomSheet with rounded corners
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        animal.info,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                    child: Image.asset(
+                      animal.imagem,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                  // Padding for the text, positioned below the expanded image
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 150,
+                    child: ClipRRect(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Colors.black.withOpacity(0.4),
+                              Colors.transparent
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            animal.info,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+
+                  // Pause button positioned at the top right
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: IconButton(
+                      iconSize: 56,
+                      icon: Icon(
+                        musicPlayng ? Icons.pause_circle_outline_outlined : Icons.play_circle_outline_outlined,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {
+                        if (musicPlayng) {
+                          await audioPlayer.pause();
+                          musicPlayng = false;
+                        } else {
+                          await audioPlayer.resume();
+                          musicPlayng = true;
+                        }
+                        setState(() {}); // Update the icon
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
-
 }
 
 class Animal {
