@@ -286,7 +286,10 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
           },
         );
       },
-    );
+    ).then((value) {
+      // Pare o áudio quando o BottomSheet for fechado
+      audioPlayer.stop();
+    });
     audioPlayer.onPlayerComplete.listen((playerState) {
       musicPlayng = false;
       iconNotifier.value = musicPlayng
