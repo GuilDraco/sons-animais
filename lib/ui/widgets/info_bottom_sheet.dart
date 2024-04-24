@@ -18,9 +18,8 @@ class _InfoBottomSheetState extends State<InfoBottomSheet> with ChangeNotifier {
 
   @override
   void dispose() {
-    widget.audioPlayer.stop();
-    widget.audioPlayer.dispose();
     super.dispose();
+    widget.audioPlayer.stop();
   }
 
   @override
