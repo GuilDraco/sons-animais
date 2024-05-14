@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
@@ -15,11 +17,47 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
   final AudioPlayer audioPlayer = AudioPlayer();
+  List<String> options = ["Avalie o App", "Que animal sou eu?", "Adivinhe qual é?"];
+
+  List<String> subtitle = ["Nos ajude avaliando nosso App.",
+    "Jogo adivinhe de quem é o som", "Jogo adivinhe o animal correto"];
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  List<Icon> icons = [
+    const Icon(Icons.star, color: Colors.blue),
+    const Icon(Icons.question_answer, color: Colors.blue),
+    const Icon(Icons.lightbulb, color: Colors.blue),
+  ];
+
+  Animal? _randomAnimal;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAnimals();
+  }
+
+  Future<void> _fetchAnimals() async {
+    final animals = await AnimalService.getAnimals();
+    if (mounted) {
+      setState(() {
+        _randomAnimal = animals.isNotEmpty ? animals[Random().nextInt(animals.length)] : null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: null,
+      key: _scaffoldKey, // Assign the key to the Scaffold
+      appBar: AppBar(
+        title: Text(widget.title,), // Set the app bar title
+        leading: IconButton(
+          icon: const Icon(Icons.menu), // Sandwich menu icon
+          onPressed: () => _scaffoldKey.currentState!.openDrawer(), // Open the drawer
+        ),
+      ),
       body: Center(
         child: FutureBuilder<List<Animal>>(
           future: AnimalService.getAnimals(),
@@ -33,6 +71,50 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
               return const CircularProgressIndicator();
             }
           },
+        ),
+      ),
+      drawer: Drawer(
+        //backgroundColor: Colors.blue,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(_randomAnimal?.imagem ?? ''),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: null,
+            ),
+            for(int i = 0; i < options.length; i++)
+              ListTile(
+                textColor: Colors.blue,
+                leading: icons[i],
+                subtitle: Text(subtitle[i]),
+                title: Text(options[i],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16
+                  ),
+                ),
+                onTap: (){
+
+                },
+              ),
+            const SizedBox(height:200),
+            Container(
+              alignment: Alignment.bottomLeft, // Center the text horizontally
+              padding: const EdgeInsets.symmetric(horizontal: 24), // Add some padding
+              child: const Text(
+                "Criado por Guilherme Alves",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

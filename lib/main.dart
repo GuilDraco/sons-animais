@@ -15,7 +15,7 @@ class MyAnimalSoundApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Animais'),
+      home: const MyHomePage(title: 'Sons animais divertidos'),
     );
   }
 }
