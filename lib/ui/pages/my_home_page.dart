@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../models/animal.dart';
 import '../../services/animal_services.dart';
 import '../widgets/info_bottom_sheet.dart';
+import 'animal_guessing_game_state.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -99,7 +100,12 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
                   ),
                 ),
                 onTap: (){
-
+                  if (i == 1) { // Check if it's the "Adivinhe qual é?" option (index 1)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AnimalGuessingGame()),
+                    );
+                  }
                 },
               ),
             const SizedBox(height:200),
