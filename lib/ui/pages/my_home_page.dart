@@ -113,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
               alignment: Alignment.bottomLeft, // Center the text horizontally
               padding: const EdgeInsets.symmetric(horizontal: 24), // Add some padding
               child: const Text(
-                "Criado por Guilherme Alves",
+                "Desenvolvido por Guilherme Alves",
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,

@@ -19,9 +19,11 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   List<Animal> _animals = [];
   Animal? _correctAnimal;
   Animal? _selectedAnimal;
-  String _feedback = '';
+  String? _feedbackImage;
   bool _isLoading = true;
+  bool isFeedbackVisible = false;
   List<Animal> animalsForRound = [];
+  final AudioPlayer feedbackPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -36,8 +38,9 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
 
   @override
   void dispose() {
-    super.dispose();
     audioPlayer.stop();
+    feedbackPlayer.stop();
+    super.dispose();
   }
 
   Future<void> _fetchAnimals() async {
@@ -60,25 +63,31 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   }
 
   void _checkAnswer(Animal selectedAnimal) {
+    if (isFeedbackVisible) return; // Bloqueia cliques adicionais
+
     audioPlayer.stop();
     setState(() {
+      isFeedbackVisible = true; // Mostra que o feedback está visível
       _selectedAnimal = selectedAnimal;
       if (_selectedAnimal == _correctAnimal) {
-        _feedback = 'Parabéns! Você acertou!';
+        _feedbackImage = 'assets/images/respostas/logo_acerto.png';
+        feedbackPlayer.play(AssetSource('audio/respostas/success_fanfare.mp3'));
       } else {
-        _feedback = 'Errado! O animal era ${_correctAnimal!.nome}.';
+        _feedbackImage = 'assets/images/respostas/logo_error_2.png';
+        feedbackPlayer.play(AssetSource('audio/respostas/failure_fanfare.mp3'));
       }
     });
 
-    // Esperar 4 segundos antes de reiniciar o jogo
-    Future.delayed(const Duration(seconds: 4), () async {
+    // Esperar 3 segundos antes de reiniciar o jogo
+    Future.delayed(const Duration(seconds: 3), () async {
       setState(() {
         _isLoading = true;
+        isFeedbackVisible = false; // Permite interação novamente
       });
       await _startGame();
       setState(() {
         _isLoading = false;
-        _feedback = '';
+        _feedbackImage = null;
       });
     });
   }
@@ -87,75 +96,92 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jogo do Som'),
+        title: const Text('De quem é o som?'),
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                if (!_isLoading) ...[
-                  const Text(
-                    'De quem é o som?',
-                    style: TextStyle(fontSize: 24),
-                  ),
-                  const SizedBox(height: 20),
-                  GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: 2,
-                    children: List.generate(4, (index) {
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double imageSize = min(constraints.maxWidth, constraints.maxHeight) * 0.9;
+          const double minImageSize = 500.0; // Tamanho mínimo da imagem
+          const double maxImageSize = 1000.0; // Tamanho máximo da imagem
+          final double finalImageSize = imageSize.clamp(minImageSize, maxImageSize);
 
-                      final animal = animalsForRound[index];
-                      return Builder(
-                        builder: (context) => GestureDetector(
-                          onTap: () => _checkAnswer(animal),
-                          child: Card(
-                            elevation: 5,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Stack(
-                              children: [
-                                ClipRRect(
+          return Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: Column(
+                  children: [
+                    if (!_isLoading) ...[
+                      const SizedBox(height: 24),
+                      GridView.count(
+                        shrinkWrap: true,
+                        crossAxisCount: 2,
+                        children: List.generate(4, (index) {
+                          final animal = animalsForRound[index];
+                          return Builder(
+                            builder: (context) => GestureDetector(
+                              onTap: () => _checkAnswer(animal),
+                              child: Card(
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: Image.asset(
-                                    animal.imagem,
-                                    fit: BoxFit.cover,
-                                  ),
                                 ),
-                                Opacity(
-                                  opacity: _selectedAnimal == animal ? 0.5 : 1,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: _selectedAnimal == animal
-                                          ? Colors.blue.withOpacity(0.3)
-                                          : Colors.transparent,
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.asset(
+                                        animal.imagem,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  ),
+                                    Opacity(
+                                      opacity: _selectedAnimal == animal ? 0.5 : 1,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: _selectedAnimal == animal
+                                              ? Colors.blue.withOpacity(0.3)
+                                              : Colors.transparent,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    }),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ],
+                ),
+              ),
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              if (_feedbackImage != null)
+                Center(
+                  child: Image.asset(
+                    _feedbackImage!,
+                    width: finalImageSize,
+                    height: finalImageSize,
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _feedback,
-                    style: const TextStyle(fontSize: 18),
+                ),
+              if (isFeedbackVisible)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
                   ),
-                ]
-              ],
-            ),
-          ),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
+                ),
+            ],
+          );
+        },
       ),
     );
   }
