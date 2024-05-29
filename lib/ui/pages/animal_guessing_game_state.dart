@@ -109,11 +109,10 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
           return Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.all(0.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
                     if (!_isLoading) ...[
-                      const SizedBox(height: 24),
                       GridView.count(
                         shrinkWrap: true,
                         crossAxisCount: 2,
@@ -141,7 +140,7 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: _selectedAnimal == animal
-                                              ? Colors.blue.withOpacity(0.3)
+                                              ? Colors.black.withOpacity(0.4)
                                               : Colors.transparent,
                                         ),
                                       ),
