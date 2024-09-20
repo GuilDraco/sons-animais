@@ -1,6 +1,14 @@
+import 'dart:math';
+
 import '../models/animal.dart';
 
 class AnimalService {
+
+  static Future<Animal?> getRandomAnimal() async {
+    final animals = await getAnimals();
+    return animals.isNotEmpty ? animals[Random().nextInt(animals.length)] : null;
+  }
+
   static Future<List<Animal>> getAnimals() async {
     await Future.delayed(const Duration(seconds: 2));
     return [

@@ -1,13 +1,11 @@
-import 'dart:math';
-
-import 'package:audioplayers/audioplayers.dart';
-import 'package:bixinhos/ui/pages/vamos_colorir_game.dart';
+import 'package:bixinhos/models/animal.dart';
 import 'package:flutter/material.dart';
-
-import '../../models/animal.dart';
-import '../../services/animal_services.dart';
-import '../widgets/info_bottom_sheet.dart';
-import 'memory_game.dart';
+import 'package:bixinhos/services/animal_services.dart';
+import 'package:bixinhos/services/menu_services.dart';
+import 'package:bixinhos/ui/widgets/animal_grid_item.dart';
+import 'package:bixinhos/ui/widgets/menu_item.dart';
+import 'package:bixinhos/ui/pages/vamos_colorir_game.dart';
+import 'package:bixinhos/ui/pages/memory_game.dart';
 import 'animal_guessing_game_state.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -19,47 +17,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
-  final AudioPlayer audioPlayer = AudioPlayer();
-  List<String> options = ["Avalie o App", "Que animal sou eu?", "Jogo da memória", "Vamos desenhar?"];
-
-  List<String> subtitle = ["Nos ajude avaliando nosso App.",
-    "Jogo adivinhe de quem é o som", "Se divirta nesse jogo da memória", "Brincar de desenho"];
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  List<Icon> icons = [
-    const Icon(Icons.star, color: Colors.blue),
-    const Icon(Icons.question_answer, color: Colors.blue),
-    const Icon(Icons.lightbulb, color: Colors.blue),
-    const Icon(Icons.lightbulb, color: Colors.blue),
-  ];
-
+  final MenuServices menuServices = MenuServices();
   Animal? _randomAnimal;
 
   @override
   void initState() {
     super.initState();
-    _fetchAnimals();
+    _fetchRandomAnimal();
   }
 
-  Future<void> _fetchAnimals() async {
-    final animals = await AnimalService.getAnimals();
-    if (mounted) {
-      setState(() {
-        _randomAnimal = animals.isNotEmpty ? animals[Random().nextInt(animals.length)] : null;
-      });
-    }
+  Future<void> _fetchRandomAnimal() async {
+    _randomAnimal = await AnimalService.getRandomAnimal();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Assign the key to the Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.title,), // Set the app bar title
+        title: Text(widget.title),
         leading: IconButton(
-          icon: const Icon(Icons.menu), // Sandwich menu icon
-          onPressed: () => _scaffoldKey.currentState!.openDrawer(), // Open the drawer
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState!.openDrawer(),
         ),
       ),
       body: Center(
@@ -67,8 +48,7 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
           future: AnimalService.getAnimals(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              List<Animal> animais = snapshot.data!;
-              return _buildGridView(animais);
+              return _buildGridView(snapshot.data!);
             } else if (snapshot.hasError) {
               return const Text('Erro ao carregar os imagens dos animais');
             } else {
@@ -77,70 +57,7 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
           },
         ),
       ),
-      drawer: Drawer(
-        //backgroundColor: Colors.blue,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(_randomAnimal?.imagem ?? ''),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: null,
-            ),
-            for(int i = 0; i < options.length; i++)
-              ListTile(
-                textColor: Colors.blue,
-                leading: icons[i],
-                subtitle: Text(subtitle[i]),
-                title: Text(options[i],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16
-                  ),
-                ),
-                onTap: (){
-                  if(i == 0){
-
-                  }
-                  if (i == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AnimalGuessingGame()),
-                    );
-                  }
-                  if(i == 2){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MemoryGame()),
-                    );
-                  }
-                  if(i == 3){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) =>  VamosColorirGame()),
-                    );
-                  }
-                },
-              ),
-            const SizedBox(height:200),
-            Container(
-              alignment: Alignment.bottomLeft, // Center the text horizontally
-              padding: const EdgeInsets.symmetric(horizontal: 24), // Add some padding
-              child: const Text(
-                "Desenvolvido por Guilherme Alves",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(),
     );
   }
 
@@ -149,106 +66,57 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
       shrinkWrap: true,
       crossAxisCount: 2,
       children: List.generate(animais.length, (index) {
-        return Stack(
-          children: [
-            GestureDetector(
-              onTap: () async {},
-              child: Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                // Add the info button to the top right corner
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        animais[index].imagem,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Opacity(
-                          opacity: 0.5,
-                          child: IconButton(
-                            iconSize: 86,
-                            icon: const Icon(
-                              Icons.play_circle_outline_outlined,
-                              color: Colors.white,
-                            ),
-                            onPressed: () async {
-                              await audioPlayer.play(
-                                  AssetSource(animais[index].audio));
-                              setState(() {
-                                  showModalBottomSheet(
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        topRight: Radius.circular(20),
-                                      ),
-                                    ),
-                                    context: context,
-                                    builder: (context) =>
-                                      InfoBottomSheet(
-                                        animal: animais[index],
-                                        audioPlayer: audioPlayer,
-                                      ),
-                                  );
-                                }
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 4,
-              left: 4,
-              right: 4,
-              height: 40,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.transparent
-                      ],
-                    ),
-                  ),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        animais[index].nome,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
+        return AnimalGridItem(animal: animais[index]);
       }),
     );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(_randomAnimal?.imagem ?? ''),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: null,
+          ),
+          for (int i = 0; i < menuServices.options.length; i++)
+            MenuItemWidget(
+              icon: menuServices.icons[i],
+              title: menuServices.options[i],
+              subtitle: menuServices.subtitle[i],
+              onTap: () => _handleMenuTap(i),
+            ),
+          const SizedBox(height: 200),
+          Container(
+            alignment: Alignment.bottomLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: const Text(
+              "Desenvolvido por Guilherme Alves",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleMenuTap(int index) {
+    switch (index) {
+      case 1:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const AnimalGuessingGame()));
+        break;
+      case 2:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const MemoryGame()));
+        break;
+      case 3:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => VamosColorirGame()));
+        break;
+    }
   }
 }
