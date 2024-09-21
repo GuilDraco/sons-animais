@@ -13,8 +13,19 @@ class InfoBottomSheet extends StatefulWidget {
   State<InfoBottomSheet> createState() => _InfoBottomSheetState();
 }
 
-class _InfoBottomSheetState extends State<InfoBottomSheet> with ChangeNotifier {
-  bool musicPlayng = true;
+class _InfoBottomSheetState extends State<InfoBottomSheet> {
+  bool musicPlaying = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Adiciona o listener para quando o áudio terminar
+    widget.audioService.setAudioCompleteListener(() {
+      setState(() {
+        musicPlaying = false; // Muda o ícone para play quando o áudio termina
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -23,23 +34,14 @@ class _InfoBottomSheetState extends State<InfoBottomSheet> with ChangeNotifier {
   }
 
   @override
-  void initState() {
-    super.initState();
-    //widget.audioService.play(AssetSource(widget.animal.audio));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final ValueNotifier<IconData> iconNotifier =
-    ValueNotifier(Icons.play_circle_outline_outlined);
+    // final ValueNotifier<IconData> iconNotifier =
+    // ValueNotifier(Icons.play_circle_outline_outlined);
 
     return StatefulBuilder(
       builder: (context, setState) {
         return Container(
-          height: MediaQuery
-              .of(context)
-              .size
-              .height * 0.75,
+          height: MediaQuery.of(context).size.height * 0.75,
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -97,14 +99,12 @@ class _InfoBottomSheetState extends State<InfoBottomSheet> with ChangeNotifier {
                 right: 5,
                 child: IconButton(
                   iconSize: 56,
-                  icon: ValueListenableBuilder<IconData>(
-                      valueListenable: iconNotifier,
-                      builder: (context, value, child) =>
-                          Icon(
-                              musicPlayng
-                                  ? Icons.pause_circle_outline_outlined
-                                  : Icons.play_circle_outline_outlined,
-                              color: Colors.white)),
+                  icon: Icon(
+                    musicPlaying
+                        ? Icons.pause_circle_outline_outlined
+                        : Icons.play_circle_outline_outlined,
+                    color: Colors.white,
+                  ),
                   onPressed: () async {
                     tocarPararMusica();
                   },
@@ -118,14 +118,13 @@ class _InfoBottomSheetState extends State<InfoBottomSheet> with ChangeNotifier {
   }
 
   Future<void> tocarPararMusica() async {
-    if (musicPlayng) {
+    if (musicPlaying) {
       await widget.audioService.stop();
-      musicPlayng = false;
+      musicPlaying = false;
     } else {
       await widget.audioService.playAnimalSound(widget.animal.audio);
-      musicPlayng = true;
+      musicPlaying = true;
     }
     setState(() {});
   }
-
 }

@@ -3,11 +3,17 @@ import 'package:bixinhos/services/audio_service.dart';
 import 'package:bixinhos/ui/widgets/info_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
-class AnimalGridItem extends StatelessWidget {
+class AnimalGridItem extends StatefulWidget {
   final Animal animal;
-  final AudioService audioService = AudioService();
 
-  AnimalGridItem({Key? key, required this.animal}) : super(key: key);
+  const AnimalGridItem({Key? key, required this.animal}) : super(key: key);
+
+  @override
+  _AnimalGridItemState createState() => _AnimalGridItemState();
+}
+
+class _AnimalGridItemState extends State<AnimalGridItem> {
+  final AudioService audioService = AudioService();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,7 @@ class AnimalGridItem extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
-                    animal.imagem,
+                    widget.animal.imagem,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -40,20 +46,23 @@ class AnimalGridItem extends StatelessWidget {
                           Icons.play_circle_outline_outlined,
                           color: Colors.white,
                         ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
+                        onPressed: () async {
+                          await audioService.playAnimalSound(widget.animal.audio);
+                          setState(() {
+                            showModalBottomSheet(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                ),
                               ),
-                            ),
-                            builder: (context) => InfoBottomSheet(
-                              animal: animal,
-                              audioService: audioService,
-                            ),
-                          );
+                              context: context,
+                              builder: (context) => InfoBottomSheet(
+                                animal: widget.animal,
+                                audioService: audioService,
+                              ),
+                            );
+                          });
                         },
                       ),
                     ),
@@ -85,7 +94,7 @@ class AnimalGridItem extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    animal.nome,
+                    widget.animal.nome,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
