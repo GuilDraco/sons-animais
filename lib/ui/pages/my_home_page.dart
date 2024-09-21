@@ -1,5 +1,7 @@
-import 'package:bixinhos/models/animal.dart';
+import 'package:bixinhos/utils/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:bixinhos/models/animal.dart';
 import 'package:bixinhos/services/animal_services.dart';
 import 'package:bixinhos/services/menu_services.dart';
 import 'package:bixinhos/ui/widgets/animal_grid_item.dart';
@@ -7,6 +9,7 @@ import 'package:bixinhos/ui/widgets/menu_item.dart';
 import 'package:bixinhos/ui/pages/vamos_colorir_game.dart';
 import 'package:bixinhos/ui/pages/memory_game.dart';
 import 'animal_guessing_game_state.dart';
+import 'languageSelectionPage.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -16,7 +19,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
+class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MenuServices menuServices = MenuServices();
   Animal? _randomAnimal;
@@ -28,36 +31,44 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
   }
 
   Future<void> _fetchRandomAnimal() async {
-    _randomAnimal = await AnimalService.getRandomAnimal();
+    final langCode = Provider.of<LanguageProvider>(context, listen: false).locale.languageCode;
+    _randomAnimal = await AnimalService.getRandomAnimal(langCode);
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final langCode = Provider.of<LanguageProvider>(context).locale.languageCode;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.title),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+        title: Consumer<LanguageProvider>(
+          builder: (context, languageProvider, _) {
+            String title = languageProvider.locale.languageCode == 'en'
+                ? 'Fun Animal Sound'
+                : 'Sons de animais divertidos';
+            return Text(title);
+          },
         ),
       ),
       body: Center(
         child: FutureBuilder<List<Animal>>(
-          future: AnimalService.getAnimals(),
+          future: AnimalService.getAnimals(langCode),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return _buildGridView(snapshot.data!);
             } else if (snapshot.hasError) {
-              return const Text('Erro ao carregar os imagens dos animais');
+              return Text(langCode == 'en'
+                  ? 'Error loading cute animals'
+                  : 'Erro ao carregar animais fofos',);
             } else {
               return const CircularProgressIndicator();
             }
           },
         ),
       ),
-      drawer: _buildDrawer(),
+      drawer: _buildDrawer(langCode),
     );
   }
 
@@ -71,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(String langCode) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -85,20 +96,22 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
             ),
             child: null,
           ),
-          for (int i = 0; i < menuServices.options.length; i++)
+          for (int i = 0; i < menuServices.getOptions(langCode).length; i++)
             MenuItemWidget(
               icon: menuServices.icons[i],
-              title: menuServices.options[i],
-              subtitle: menuServices.subtitle[i],
+              title: menuServices.getOptions(langCode)[i],
+              subtitle: menuServices.getSubtitles(langCode)[i],
               onTap: () => _handleMenuTap(i),
             ),
-          const SizedBox(height: 200),
+          const SizedBox(height: 100),
           Container(
             alignment: Alignment.bottomLeft,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: const Text(
-              "Desenvolvido por Guilherme Alves",
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            child: Text(
+              langCode == 'en'
+              ? 'Developed by Guilherme Alves'
+                  : 'Desenvolvido por Guilherme Alves',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ),
         ],
@@ -115,7 +128,10 @@ class _MyHomePageState extends State<MyHomePage> with ChangeNotifier {
         Navigator.push(context, MaterialPageRoute(builder: (context) => const MemoryGame()));
         break;
       case 3:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => VamosColorirGame()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const VamosColorirGame()));
+        break;
+      case 4:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageSelectionPage()));
         break;
     }
   }

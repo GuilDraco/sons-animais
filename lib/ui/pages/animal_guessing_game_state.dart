@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:bixinhos/models/animal.dart';
+import 'package:bixinhos/services/animal_services.dart';
+import 'package:bixinhos/utils/language_provider.dart';
 import 'package:flutter/material.dart';
-
-import '../../models/animal.dart';
-import '../../services/animal_services.dart';
+import 'package:provider/provider.dart';
 
 class AnimalGuessingGame extends StatefulWidget {
   const AnimalGuessingGame({super.key});
@@ -44,7 +45,8 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   }
 
   Future<void> _fetchAnimals() async {
-    final animals = await AnimalService.getAnimals();
+    final langCode = Provider.of<LanguageProvider>(context, listen: false).locale.languageCode;
+    final animals = await AnimalService.getAnimals(langCode);
     setState(() {
       _animals = animals;
     });
@@ -96,7 +98,14 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('De quem é o som?'),
+        title: Consumer<LanguageProvider>(
+          builder: (context, languageProvider, _) {
+            String title = languageProvider.locale.languageCode == 'en'
+                ? 'Who makes the sound?'
+                : 'De quem é o som?';
+            return Text(title);
+          },
+        ),
         centerTitle: true,
       ),
       body: LayoutBuilder(

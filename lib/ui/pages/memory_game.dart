@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:bixinhos/utils/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/animal.dart';
 import '../../services/animal_services.dart';
@@ -23,7 +25,7 @@ class _MemoryGameState extends State<MemoryGame> {
   List<int> _selectedCards = [];
   bool _isLoading = true;
   int _pairsFound = 0;
-  int _numPairs = 2; // Começa com 3 pares
+  int _numPairs = 2; // Começa com 2 pares
   bool _showSuccessImage = false;
 
   @override
@@ -45,7 +47,8 @@ class _MemoryGameState extends State<MemoryGame> {
   }
 
   Future<void> _fetchAnimals() async {
-    final animals = await AnimalService.getAnimals();
+    final langCode = Provider.of<LanguageProvider>(context, listen: false).locale.languageCode;
+    final animals = await AnimalService.getAnimals(langCode);
     setState(() {
       _animals = animals;
     });
@@ -110,7 +113,14 @@ class _MemoryGameState extends State<MemoryGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jogo da Memória'),
+        title: Consumer<LanguageProvider>(
+          builder: (context, languageProvider, _) {
+            String title = languageProvider.locale.languageCode == 'en'
+                ? 'Memory game'
+                : 'Jogo da memória';
+            return Text(title);
+          },
+        ),
         centerTitle: true,
       ),
       body: LayoutBuilder(
