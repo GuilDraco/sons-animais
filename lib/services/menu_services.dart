@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class MenuServices {
   Map<String, List<String>> options = {
-    'pt': ["Avalie o App", "Que animal sou eu?", "Jogo da memória", "Vamos desenhar?", "Configurações"],
-    'en': ["Rate the App", "Which animal am I?", "Memory Game", "Let's Draw?", "Settings"],
+    'pt': ["Que animal sou eu?", "Jogo da memória", "Vamos desenhar?", "Linguagem"],
+    'en': ["Which animal am I?", "Memory Game", "Let's Draw?", "Language"],
   };
 
   Map<String, List<String>> subtitle = {
@@ -24,7 +24,7 @@ class MenuServices {
   };
 
   List<Icon> icons = [
-    const Icon(Icons.star, color: Colors.blue),
+    //const Icon(Icons.star, color: Colors.blue),
     const Icon(Icons.question_answer, color: Colors.blue),
     const Icon(Icons.lightbulb, color: Colors.blue),
     const Icon(Icons.format_paint, color: Colors.blue),

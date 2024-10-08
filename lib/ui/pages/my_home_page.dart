@@ -103,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
               subtitle: menuServices.getSubtitles(langCode)[i],
               onTap: () => _handleMenuTap(i),
             ),
-          const SizedBox(height: 100),
+          const SizedBox(height: 20),
           Container(
             alignment: Alignment.bottomLeft,
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -121,16 +121,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleMenuTap(int index) {
     switch (index) {
-      case 1:
+      case 0:
         Navigator.push(context, MaterialPageRoute(builder: (context) => const AnimalGuessingGame()));
         break;
-      case 2:
+      case 1:
         Navigator.push(context, MaterialPageRoute(builder: (context) => const MemoryGame()));
         break;
-      case 3:
+      case 2:
         Navigator.push(context, MaterialPageRoute(builder: (context) => const VamosColorirGame()));
         break;
-      case 4:
+      case 3:
         Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageSelectionPage()));
         break;
     }
