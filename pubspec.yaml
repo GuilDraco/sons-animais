@@ -60,6 +60,7 @@ flutter:
     - assets/images/animais/
     - assets/images/respostas/
     - assets/images/memoria/
+    - assets/images/icons/
     - assets/audio/animais/
     - assets/audio/respostas/
     - assets/audio/memoria/

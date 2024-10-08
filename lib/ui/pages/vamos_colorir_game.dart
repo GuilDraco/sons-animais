@@ -12,17 +12,46 @@ class _VamosColorirGameState extends State<VamosColorirGame> {
   List<MapEntry<Offset?, Paint>> points = [];
   Color selectedColor = Colors.black;
   double strokeWidth = 5.0; // Espessura do traço padrão
+  bool isEraserActive = false; // Borracha ativada ou não
+
+  // Mapeamento das espessuras para os ícones correspondentes
+  final Map<double, String> strokeWidthIcons = {
+    2.0: 'assets/images/icons/finePen.png',  // Ícone para traço fino
+    5.0: 'assets/images/icons/thinPen.png',  // Ícone para traço médio-fino
+    8.0: 'assets/images/icons/mediumPen.png', // Ícone para traço médio
+    12.0: 'assets/images/icons/boldPen.png',  // Ícone para traço grosso
+    16.0: 'assets/images/icons/heavyPen.png', // Ícone para traço mais grosso
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.clear),
+            icon: Image.asset(
+              'assets/images/icons/delete.png', // Caminho para a imagem de delete
+              width: 24, // Largura da imagem
+              height: 24, // Altura da imagem
+            ),
             onPressed: () {
               setState(() {
                 points.clear(); // Limpa a tela
+              });
+            },
+          ),
+          IconButton(
+            icon: Image.asset(
+              isEraserActive
+                  ? 'assets/images/icons/eraser_p.png' // Ícone de borracha ativa
+                  : 'assets/images/icons/eraser.png', // Ícone de borracha inativa
+              width: 24, // Largura da imagem
+              height: 24, // Altura da imagem
+            ),
+            onPressed: () {
+              setState(() {
+                isEraserActive = !isEraserActive; // Alterna o estado da borracha
               });
             },
           ),
@@ -37,7 +66,7 @@ class _VamosColorirGameState extends State<VamosColorirGame> {
                   MapEntry(
                     details.localPosition,
                     Paint()
-                      ..color = selectedColor
+                      ..color = isEraserActive ? Colors.white : selectedColor
                       ..strokeCap = StrokeCap.round
                       ..strokeWidth = strokeWidth,
                   ),
@@ -106,23 +135,31 @@ class _VamosColorirGameState extends State<VamosColorirGame> {
       onTap: () {
         setState(() {
           strokeWidth = width; // Define a espessura do traço
+          isEraserActive = false; // Sai do modo borracha ao escolher a espessura
         });
       },
       child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: strokeWidth == width ? Colors.green : Colors.white, // Círculo verde quando selecionado
+          color: !isEraserActive && strokeWidth == width ? Colors.green : Colors.white, // Destaca o traço se for selecionado e não estiver no modo borracha
           shape: BoxShape.circle,
           border: Border.all(
             width: 2,
-            color: strokeWidth == width ? Colors.green : Colors.black,
+            color: !isEraserActive && strokeWidth == width ? Colors.green : Colors.black,
           ),
         ),
-        child: Icon(
-          Icons.create, // Ícone de caneta
-          size: 20,
-          color: strokeWidth == width ? Colors.white : Colors.black, // Ícone verde quando selecionado
+        child: Center(
+          // Alinha a imagem no centro
+          child: FittedBox(
+            // Ajusta o tamanho da imagem dentro do container
+            child: Image.asset(
+              strokeWidthIcons[width]!, // Usa o ícone correspondente à espessura
+              width: 28, // Tamanho desejado da imagem
+              height: 28,
+              color: !isEraserActive && strokeWidth == width ? Colors.white : Colors.black, // Cor da imagem quando selecionada
+            ),
+          ),
         ),
       ),
     );
@@ -133,6 +170,7 @@ class _VamosColorirGameState extends State<VamosColorirGame> {
       onTap: () {
         setState(() {
           selectedColor = color; // Define a cor selecionada
+          isEraserActive = false; // Sai do modo borracha ao escolher uma cor
         });
       },
       child: Container(
@@ -143,7 +181,7 @@ class _VamosColorirGameState extends State<VamosColorirGame> {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            width: 3,
+            width: 2,
             color: selectedColor == color ? Colors.black : Colors.transparent,
           ),
         ),
