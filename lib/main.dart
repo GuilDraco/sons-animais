@@ -19,6 +19,7 @@ class MyAnimalSoundApp extends StatelessWidget {
       child: Consumer<LanguageProvider>(
         builder: (context, languageProvider, child) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             locale: languageProvider.locale,
             title: 'Animais',
             theme: ThemeData(

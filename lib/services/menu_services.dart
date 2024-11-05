@@ -8,14 +8,14 @@ class MenuServices {
 
   Map<String, List<String>> subtitle = {
     'pt': [
-      "Nos ajude avaliando nosso App.",
+      // "Nos ajude avaliando nosso App.",
       "Jogo adivinhe de quem é o som",
       "Se divirta nesse jogo da memória",
       "Brincar de desenho",
       ""
     ],
     'en': [
-      "Help us by rating our App.",
+      // "Help us by rating our App.",
       "Guess which animal makes the sound",
       "Have fun in this memory game",
       "Have fun drawing",

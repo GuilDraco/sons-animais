@@ -45,7 +45,8 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
   }
 
   Future<void> _fetchAnimals() async {
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).locale.languageCode;
+    final langCode =
+        Provider.of<LanguageProvider>(context, listen: false).locale.languageCode;
     final animals = await AnimalService.getAnimals(langCode);
     setState(() {
       _animals = animals;
@@ -54,7 +55,7 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
 
   Future<void> _startGame() async {
     final shuffledAnimals = _animals.toList()..shuffle();
-    animalsForRound = shuffledAnimals.take(4).toList();
+    animalsForRound = shuffledAnimals.take(8).toList();
 
     setState(() {
       _selectedAnimal = null;
@@ -110,25 +111,28 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final double imageSize = min(constraints.maxWidth, constraints.maxHeight) * 0.9;
+          final double imageSize =
+              min(constraints.maxWidth, constraints.maxHeight) * 0.9;
           const double minImageSize = 500.0; // Tamanho mínimo da imagem
           const double maxImageSize = 1000.0; // Tamanho máximo da imagem
-          final double finalImageSize = imageSize.clamp(minImageSize, maxImageSize);
+          final double finalImageSize =
+          imageSize.clamp(minImageSize, maxImageSize);
 
           return Stack(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    if (!_isLoading) ...[
-                      GridView.count(
-                        shrinkWrap: true,
-                        crossAxisCount: 2,
-                        children: List.generate(4, (index) {
-                          final animal = animalsForRound[index];
-                          return Builder(
-                            builder: (context) => GestureDetector(
+                child: SingleChildScrollView( // Envolve o Column com SingleChildScrollView
+                  child: Column(
+                    children: [
+                      if (!_isLoading) ...[
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(), // Desabilita o scroll do GridView
+                          crossAxisCount: 2,
+                          children: List.generate(8, (index) {
+                            final animal = animalsForRound[index];
+                            return GestureDetector(
                               onTap: () => _checkAnswer(animal),
                               child: Card(
                                 elevation: 5,
@@ -145,7 +149,8 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
                                       ),
                                     ),
                                     Opacity(
-                                      opacity: _selectedAnimal == animal ? 0.5 : 1,
+                                      opacity:
+                                      _selectedAnimal == animal ? 0.5 : 1,
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: _selectedAnimal == animal
@@ -157,13 +162,13 @@ class _AnimalGuessingGameState extends State<AnimalGuessingGame> {
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 20),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
               if (_isLoading)
