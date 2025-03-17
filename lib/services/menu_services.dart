@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class MenuServices {
   Map<String, List<String>> options = {
-    'pt': ["Que animal sou eu?", "Jogo da memória", "Vamos desenhar?", "Linguagem"],
-    'en': ["Which animal am I?", "Memory Game", "Let's Draw?", "Language"],
+    'pt': ["Que animal sou eu?", "Jogo da memória", "Vamos desenhar?", "Configurações e termos"],
+    'en': ["Which animal am I?", "Memory Game", "Let's Draw?", "Settings and terms"],
   };
 
   Map<String, List<String>> subtitle = {

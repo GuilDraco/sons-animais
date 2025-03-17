@@ -19,11 +19,11 @@ class MenuItemWidget extends StatelessWidget {
     return ListTile(
       textColor: Colors.blue,
       leading: icon,
-      subtitle: Text(subtitle),
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
+      subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
       onTap: onTap,
     );
   }
